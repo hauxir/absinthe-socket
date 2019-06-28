@@ -39,7 +39,7 @@ const onError = (
   absintheSocket: AbsintheSocket,
   notifier: Notifier<any, any>,
   errorMessage: string
-) => abortNotifier(absintheSocket, notifier, createRequestError(errorMessage));
+) => abortNotifier(absintheSocket, notifier, errorMessage.errors);
 
 const getNotifierPushHandler = onSucceed => ({onError, onSucceed, onTimeout});
 
