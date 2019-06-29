@@ -6,7 +6,7 @@ module.exports = {
     "build:flow": "nps 'build:flow:copy-source dist' 'build:flow:copy-source compat/cjs'",
     "build:src:bundle": "rollup -c ../../rollup.config.js",
     "build:src:clean": "rm -rfv dist compat",
-    "build:src": "nps 'build:src:clean' 'build:src:bundle' 'build:src:flow'",
+    "build:src": "nps 'build:src:clean' 'build:src:bundle' 'build:flow'",
     "prepack": "nps 'build:src'",
     "version": "nps 'build:readme' && git add README.md",
   }
