@@ -31,9 +31,15 @@ const postJson = (url: string, body: Object): Promise<string> =>
 
 const getSubscribeCallback = observer => (error, result) => {
   if (error) {
-    observer.error(error);
-  } else {
+    if (observer.error) {
+      observer.error(JSON.stringify(error, null, "  "));
+    } else {
+      observer(error);
+    }
+  } else if (observer.next) {
     observer.next(result);
+  } else {
+    observer(result);
   }
 };
 
@@ -44,12 +50,13 @@ const subscribeWithObservable = (
   gqlRequestCompat
 ) => ({
   subscribe: (observer: {error: Function, next: Function}) => {
-    observer.next(subscriptionSentMessage);
-
     state.activeSubscriptionId = subscriptionsClient.subscribe(
       gqlRequestCompat,
       getSubscribeCallback(observer)
     );
+    if (state.activeSubscriptionId) {
+      observer.next(subscriptionSentMessage);
+    }
   }
 });
 
@@ -59,7 +66,8 @@ const subscribeWithObservable = (
 const createFetcher = (
   apiUrl: string,
   subscriptionsClient: SubscriptionClient,
-  subscriptionSentMessage: string
+  subscriptionSentMessage: string,
+  useSocketForQueriesAndMutations: boolean
 ) => {
   const state = {activeSubscriptionId: undefined};
 
@@ -68,7 +76,7 @@ const createFetcher = (
       subscriptionsClient.unsubscribe(state.activeSubscriptionId);
     }
 
-    return getOperationType(gqlRequestCompat.query) !== "subscription"
+    return getOperationType(gqlRequestCompat.query) !== "subscription" && !useSocketForQueriesAndMutations
       ? postJson(apiUrl, gqlRequestCompat)
       : subscribeWithObservable(
           state,

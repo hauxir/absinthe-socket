@@ -1,6 +1,7 @@
 // @flow
 
 import * as withAbsintheSocket from "@absinthe/socket";
+import {getOperationType} from "@jumpn/utils-graphql";
 import {requestFromCompat} from "@jumpn/utils-graphql";
 import {Socket as PhoenixSocket} from "phoenix";
 
@@ -90,11 +91,11 @@ export default class SubscriptionsClient {
       this.absintheSocket,
       requestFromCompat(requestCompat)
     );
-
-    const requestKey = storeRequestIfNeeded(this, notifier.request);
-
+    let requestKey = null;
+    if (getOperationType(requestCompat.query) === "subscription") {
+      requestKey = storeRequestIfNeeded(this, notifier.request);
+    }
     observe(this, notifier, callback);
-
     return requestKey;
   }
 
